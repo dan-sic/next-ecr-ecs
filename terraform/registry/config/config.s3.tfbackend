@@ -1,0 +1,3 @@
+bucket = "terraform-states-39"
+key    = "next-ecr-ecs.tfstate"
+region = "eu-central-1"
