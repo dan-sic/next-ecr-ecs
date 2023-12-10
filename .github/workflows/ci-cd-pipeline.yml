@@ -32,7 +32,7 @@ jobs:
 
           terraform init \
           -backend-config=config/config.s3.tfbackend \
-          -reconfigure
+          -reconfigure \
           -input=false
 
           terraform apply \
@@ -40,8 +40,7 @@ jobs:
           -input=false \
           -auto-approve
 
-          echo "registry_url=$(terraform output -raw repository_url | cut -d'/' -f2)" \ 
-          >> $GITHUB_OUTPUT
+          echo "registry_url=$(terraform output -raw repository_url)" >> "$GITHUB_OUTPUT"
 
   docker-build:
     runs-on: ubuntu-latest
@@ -70,8 +69,6 @@ jobs:
   deploy-app:
     runs-on: ubuntu-latest
     needs: docker-build
-    env:
-      REGISTRY_URL: ${{ needs.registry.outputs.registry_url }}
     steps:
       - name: "Checkout"
         uses: actions/checkout@v4
@@ -88,7 +85,7 @@ jobs:
 
           terraform init \
           -backend-config=config/config.s3.tfbackend \
-          -reconfigure
+          -reconfigure \
           -input=false
 
           terraform apply \
