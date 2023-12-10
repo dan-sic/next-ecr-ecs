@@ -56,8 +56,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
-      - name: "Create ECR"
-        id: create_ecr
+      - name: "Build and Push Docker Image"
         run: |
           export IMAGE_TAG=$(git rev-parse --short HEAD)
 
@@ -67,3 +66,32 @@ jobs:
 
           docker build -t ${{ env.REGISTRY_URL }}:${IMAGE_TAG} .
           docker push ${{ env.REGISTRY_URL }}:${IMAGE_TAG}
+
+  deploy-app:
+    runs-on: ubuntu-latest
+    needs: docker-build
+    env:
+      REGISTRY_URL: ${{ needs.registry.outputs.registry_url }}
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+      - name: "Setup AWS Credentials"
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: "Deploy App"
+        run: |
+          export TF_VAR_image_tag=$(git rev-parse --short HEAD)
+
+          cd terraform/deployment
+
+          terraform init \
+          -backend-config=config/config.s3.tfbackend \
+          -reconfigure
+          -input=false
+
+          terraform apply \
+          -var-file=vars.tfvars \
+          -input=false \
+          -auto-approve
