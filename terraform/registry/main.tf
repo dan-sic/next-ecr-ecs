@@ -12,6 +12,8 @@ terraform {
       version = ">= 3.1.0"
     }
   }
+
+  backend "s3" { /* See the backend config in config.s3.tfbackend */ }
 }
 
 

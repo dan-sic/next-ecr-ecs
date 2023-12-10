@@ -1,3 +1,3 @@
 bucket = "terraform-states-39"
-key    = "next-ecr-ecs-registry.tfstate"
+key    = "next-ecr-ecs-deployment.tfstate"
 region = "eu-central-1"
